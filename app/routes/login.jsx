@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { signUp, signIn, signInWithGoogle, signOut } from '../../lib/firebaseAuth';
+import { Box, TextField, Button, Typography, Container } from '@mui/material';
 
 export const Login = () => {
     const [email, setEmail] = useState('');
@@ -30,16 +31,31 @@ export const Login = () => {
         }
     };
 
-    const handleSignOut = async () => {
-        try {
-            await signOut();
-            alert('Successfully signed out');
-        } catch (error) {
-            console.error("Error signing out:", error);
-            alert(`Error: ${error.message}`);
-        }
-    };
-}
-
-
-export default Login;
+    return (
+        <Container>
+            <Box>
+                <Typography variant="h4">{isSignUp ? 'Sign Up' : 'Sign In'}</Typography>
+                <TextField
+                    label="Email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                />
+                <TextField
+                    label="Password"
+                    type="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                />
+                <Button onClick={handleAuth}>
+                    {isSignUp ? 'Sign Up' : 'Sign In'}
+                </Button>
+                <Button onClick={handleGoogleAuth}>
+                    Sign In with Google
+                </Button>
+                <Button onClick={() => setIsSignUp(!isSignUp)}>
+                    {isSignUp ? 'Switch to Sign In' : 'Switch to Sign Up'}
+                </Button>
+            </Box>
+        </Container>
+    );
+};

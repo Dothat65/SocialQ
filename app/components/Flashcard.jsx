@@ -1,7 +1,9 @@
-import React, { useState } from 'react';
-import { Container, TextField, Button, Typography } from '@mui/material';
+//Flashcard.jsx
+import { useState } from 'react';
+import { marked } from 'marked';
+import '/app/globals.css';
 
-const FlashcardPage = () => {
+function Flashcard() {
   const [prompt, setPrompt] = useState('');
   const [flashcards, setFlashcards] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -9,7 +11,7 @@ const FlashcardPage = () => {
   const handleGenerateFlashcard = async () => {
     setLoading(true);
     try {
-      const response = await fetch('/api/generate-flashcard', {
+      const response = await fetch('/api/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -47,30 +49,41 @@ const FlashcardPage = () => {
   };
 
   return (
-    <Container maxWidth="md" sx={{ mt: 8 }}>
-      <Typography variant="h4" sx={{ mb: 4 }}>SocialQ Flashcard Generator</Typography>
-      <TextField
-        fullWidth
-        variant="outlined"
+    <div className="container">
+      <h1>SocialQ Flashcard Generator</h1>
+      <input
+        type="text"
         value={prompt}
         onChange={(e) => setPrompt(e.target.value)}
         placeholder="Enter the context for your flashcard"
-        sx={{ mb: 2 }}
       />
-      <Button onClick={handleGenerateFlashcard} variant="contained" color="primary" disabled={loading}>
+      <button onClick={handleGenerateFlashcard} disabled={loading}>
         {loading ? 'Generating...' : 'Generate Flashcard'}
-      </Button>
-      <Button onClick={handleReset} variant="outlined" color="secondary" sx={{ ml: 2 }}>
+      </button>
+      <button onClick={handleReset} style={{ marginLeft: '10px' }}>
         Reset All
-      </Button>
+      </button>
 
       {flashcards.map((flashcard, index) => (
-        <div key={index} onClick={() => handleFlip(index)}>
-          <Typography variant="h6">{flashcard.flipped ? flashcard.back : flashcard.front}</Typography>
+        <div
+          key={index}
+          className={`flashcard ${flashcard.flipped ? 'flipped' : ''}`}
+          onClick={() => handleFlip(index)}
+        >
+          <div className="flashcard-inner">
+            <div className="flashcard-front">
+              <h2>Front</h2>
+              <div dangerouslySetInnerHTML={{ __html: marked(flashcard.front) }} />
+            </div>
+            <div className="flashcard-back">
+              <h2>Back</h2>
+              <div dangerouslySetInnerHTML={{ __html: marked(flashcard.back) }} />
+            </div>
+          </div>
         </div>
       ))}
-    </Container>
+    </div>
   );
-};
+}
 
-export default FlashcardPage;
+export default Flashcard;
