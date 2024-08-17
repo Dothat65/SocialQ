@@ -18,7 +18,8 @@
     "openai": "^4.55.9",
     "react": "^18",
     "react-dom": "^18",
-    "stripe": "^16.8.0"
+    "stripe": "^16.8.0", 
+    "uuid": "^10.0.0"    
   },
   "devDependencies": {
     "eslint": "^8",
