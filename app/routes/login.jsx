@@ -5,6 +5,7 @@ export const Login = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
     const [isSignUp, setIsSignUp] = useState(false);
+    const [message, setMessage] = useState('');
 
     const handleAuth = async () => {
         try {
@@ -13,33 +14,36 @@ export const Login = () => {
             } else {
                 await signIn(email, password);
             }
-            alert(`Successfully ${isSignUp ? 'signed up' : 'signed in'}`);
+            setMessage(`Successfully ${isSignUp ? 'signed up' : 'signed in'}`);
         } catch (error) {
             console.error("Error signing in:", error);
-            alert(`Error: ${error.message}`);
+            setMessage(`Error: ${error.message}`);
         }
     };
 
     const handleGoogleAuth = async () => {
         try {
             await signInWithGoogle();
-            alert('Successfully signed in with Google');
+            setMessage('Successfully signed in with Google');
         } catch (error) {
             console.error("Error signing in with Google:", error);
-            alert(`Error: ${error.message}`);
+            setMessage(`Error: ${error.message}`);
         }
     };
 
     const handleSignOut = async () => {
         try {
             await signOut();
-            alert('Successfully signed out');
+            setMessage('Successfully signed out');
         } catch (error) {
             console.error("Error signing out:", error);
-            alert(`Error: ${error.message}`);
+            setMessage(`Error: ${error.message}`);
         }
     };
-}
 
+    return (
+       <div></div>
+    );
+};
 
 export default Login;
