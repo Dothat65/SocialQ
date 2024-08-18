@@ -1,4 +1,4 @@
-//Flashcard.jsx
+// original Flashcard.jsx file need to be updated the code to the new flashcard.js in apps/dashboard/Flashcard component properly with api
 import { useState } from 'react';
 import { marked } from 'marked';
 import '/app/globals.css';
