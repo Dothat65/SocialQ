@@ -1,4 +1,4 @@
-import Navbar from './components/Navbar';
+//import Navbar from './components/Navbar';
 import './globals.css';
 
 export default function RootLayout({ children }) {
@@ -8,7 +8,6 @@ export default function RootLayout({ children }) {
         <title>Flashcard App</title>
       </head>
       <body>
-        <Navbar />
         {children}
       </body>
     </html>

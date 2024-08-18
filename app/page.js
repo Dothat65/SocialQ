@@ -1,7 +1,8 @@
 'use client'
 import React from 'react';
-import Home from './routes/homepage.jsx';
+import Homepage from './homepage/page.js';
+//import Home from './routes/homepage.js';
 
-export default function HomePage() {
-  return <Home />;
+export default function Home() {
+  return <Homepage />;
 }
