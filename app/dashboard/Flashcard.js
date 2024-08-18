@@ -44,6 +44,11 @@ const Flashcard = ({ flashcardsData }) => {
     setEditedFlashcard({ ...editedFlashcard, [name]: value });
   };
 
+  // Check if flashcardsData is defined and not empty
+  if (!flashcardsData || flashcardsData.length === 0) {
+    return <Typography>No flashcards available</Typography>;
+  }
+
   const currentCard = flashcardsData[currentCardIndex];
 
   return (
