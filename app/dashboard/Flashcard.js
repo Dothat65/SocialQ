@@ -1,3 +1,4 @@
+'use client'
 import React, { useState } from 'react';
 import { Box, Typography, IconButton, Container, Card, CardContent, CardActions, TextField, Button } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';

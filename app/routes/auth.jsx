@@ -1,6 +1,6 @@
+"use client";
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation'
-
 import { signUp, signIn, signInWithGoogle, signOut } from '../../lib/firebaseAuth';
 import { Box, Button, Container, Divider, Grid, TextField, Typography, IconButton } from '@mui/material';
 import LockIcon from '@mui/icons-material/Lock';
@@ -22,7 +22,7 @@ const Login = () => {
                 await signIn(email, password);
             }
             setMessage(`Successfully ${isSignUp ? 'signed up' : 'signed in'}`);
-            router.push('/home'); // Navigate to the home after successful login/signup
+            router.push('/homepage'); // Navigate to the home after successful login/signup
         } catch (error) {
             console.error("Error signing in:", error);
             setMessage(`Error: ${error.message}`);
@@ -33,7 +33,7 @@ const Login = () => {
         try {
             await signInWithGoogle();
             setMessage('Successfully signed in with Google');
-            router.push('/home'); // Navigate to the dashboard after successful Google sign-in
+            router.push('/homepage'); // Navigate to the dashboard after successful Google sign-in
         } catch (error) {
             console.error("Error signing in with Google:", error);
             setMessage(`Error: ${error.message}`);
