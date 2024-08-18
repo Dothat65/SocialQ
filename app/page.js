@@ -1,12 +1,8 @@
 'use client'
 import React from 'react';
-import Flashcard, { flashcard } from './components/flashcard';
-import {Login} from './routes/login.jsx';
+import Homepage from './homepage/page.js';
+//import Home from './routes/homepage.js';
 
 export default function Home() {
-  return (
-    <div>
-        <Flashcard></Flashcard>
-    </div>
-  );
+  return <Homepage />;
 }
