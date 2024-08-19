@@ -7,30 +7,75 @@ const openai = new OpenAI({
 
 export async function POST(req) {
   try {
-    const { prompt } = await req.json();
+    const { prompt, count } = await req.json();
 
     if (!prompt) {
       return NextResponse.json({ message: 'Prompt is required' }, { status: 400 });
     }
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4",
-      messages: [
-        { role: "system", content: "You are an assistant that creates flashcards containing jokes, conversation starters, and questions." },
-        { role: "user", content: `Create a flashcard with the following context: ${prompt}. Separate the front and back with a delimiter like '---'.` },
-      ],
-    });
-
-    const generatedText = completion.choices[0].message.content;
-    const [front, back] = generatedText.split('---').map(part => part.trim());
-
-    if (!front || !back) {
-      return NextResponse.json({ message: 'Unable to generate flashcard content properly' }, { status: 500 });
+    if (!count || count <= 0) {
+      return NextResponse.json({ message: 'Valid count is required' }, { status: 400 });
     }
 
-    return NextResponse.json({ front, back });
+    const flashcards = [];
+
+    for (let i = 0; i < count; i++) {
+      const modifiedPrompt = `${prompt} Variation ${i + 1}`;
+      console.log(`Generating flashcard ${i + 1} with prompt: ${modifiedPrompt}`);
+
+      try {
+        const completion = await openai.chat.completions.create({
+          model: 'gpt-4-turbo',
+          messages: [
+            {
+              role: "system",
+              content: `
+                You are a creative assistant specializing in generating flashcards for educational and entertainment purposes. 
+                Your task is to generate unique and original content each time, ensuring that no two flashcards are alike. 
+                When generating a flashcard, ensure it is appropriate, engaging, and varied. 
+                Avoid repetition, and introduce new ideas or twists to common themes whenever possible.
+              `,
+            },
+            {
+              role: "user",
+              content: `Create a flashcard with the following context: ${modifiedPrompt}. Separate the front and back with the delimiter '---'.`,
+            },
+          ],
+        });
+
+        const generatedText = completion.choices[0]?.message?.content;
+        console.log(`Response for flashcard ${i + 1}:`, generatedText);
+
+        if (generatedText) {
+          let [front, back] = generatedText.split('---').map(part => part.trim());
+
+          if (!front || !back) {
+            front = generatedText.match(/(?:\*\*Front:\*\*|Front:)\s*(.*)/i)?.[1] || '';
+            back = generatedText.match(/(?:\*\*Back:\*\*|Back:)\s*(.*)/i)?.[1] || '';
+          }
+
+          if (front && back) {
+            flashcards.push({ front, back });
+          } else {
+            console.warn(`Invalid flashcard format in response for flashcard ${i + 1}`);
+          }
+        } else {
+          console.error(`No response or malformed response for flashcard ${i + 1}`);
+        }
+      } catch (apiError) {
+        console.error(`API Error while generating flashcard ${i + 1}:`, apiError);
+      }
+    }
+
+    console.log('Generated Flashcards:', flashcards);
+
+    if (flashcards.length === 0) {
+      return NextResponse.json({ message: 'Unable to generate flashcards' }, { status: 500 });
+    }
+
+    return NextResponse.json({ flashcards }, { status: 200 });
   } catch (error) {
-    console.error("Error generating flashcard:", error);
-    return NextResponse.json({ message: 'Error generating flashcard' }, { status: 500 });
+    console.error("Error generating flashcards:", error);
+    return NextResponse.json({ message: 'An error occurred while generating flashcards', error: error.message }, { status: 500 });
   }
 }
