@@ -1,7 +1,6 @@
-'use client';
+"use client"
 import React, { useState } from 'react';
-import { Box, Container, Typography, Grid, Paper, IconButton, TextField, InputAdornment } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search';
+import { Box, Container, Typography, IconButton, Grid, Paper, Button } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import HomeIcon from '@mui/icons-material/Home';
 import PersonIcon from '@mui/icons-material/Person';
@@ -11,6 +10,7 @@ import FlashcardModal from '../homepage/modal';
 import Flashcard from '../dashboard/Flashcard';
 import { getAuth } from "firebase/auth";
 
+import Flashcard from '../components/Flashcard';
 
 const cleanFlashcardText = (text) => {
   return text.replace(/(\*\*Front:\*\*|\*\*Back:\*\*)/gi, '').trim();
@@ -20,6 +20,7 @@ export default function Homepage() {
   const [user, setUser] = useState(null);
   const [openModal, setOpenModal] = useState(false);
   const [flashcards, setFlashcards] = useState([]);
+  const [newFlashcard, setNewFlashcard] = useState({ front: '', back: '' });
 
   const handleOpenModal = () => setOpenModal(true);
   const handleCloseModal = () => setOpenModal(false);
@@ -39,7 +40,6 @@ export default function Homepage() {
       });
 
       const data = await response.json();
-      console.log('API Response:', data);
 
       if (!data.flashcards || !Array.isArray(data.flashcards)) {
         throw new Error('Invalid flashcards data received');
@@ -55,6 +55,17 @@ export default function Homepage() {
       setFlashcards(uniqueFlashcards);
     } catch (error) {
       console.error('Error generating flashcards:', error);
+    }
+  };
+
+  const handleAddFlashcard = () => {
+    setFlashcards([...flashcards, newFlashcard]);
+    setNewFlashcard({ front: '', back: '' });
+  };
+
+  const handleRemoveFlashcard = () => {
+    if (flashcards.length > 0) {
+      setFlashcards(flashcards.slice(0, -1));
     }
   };
 
@@ -74,107 +85,12 @@ export default function Homepage() {
             mb: 4,
           }}
         >
-          <Box>
-            <Typography variant="h4">Aaron Don</Typography>
-          </Box>
-          <Box>
-            <Grid container spacing={2} alignItems="center">
-              <Grid item>
-                <Paper sx={{ p: 2, borderRadius: 2 }}>
-                  <FlashOnIcon sx={{ color: '#11144c' }} />
-                  <Typography variant="h6" align="center">
-                    37
-                  </Typography>
-                  <Typography variant="body2" align="center">
-                    Flashcards Added
-                  </Typography>
-                </Paper>
-              </Grid>
-              <Grid item>
-                <Paper sx={{ p: 2, borderRadius: 2 }}>
-                  <AccessTimeIcon sx={{ color: '#11144c' }} />
-                  <Typography variant="h6" align="center">
-                    122+
-                  </Typography>
-                  <Typography variant="body2" align="center">
-                    Hours Spent
-                  </Typography>
-                </Paper>
-              </Grid>
-            </Grid>
-          </Box>
-        </Box>
-
-        {/* Search Flashcards */}
-        <Grid container spacing={4}>
-          <Grid item xs={12} sm={6}>
-            <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
-              <Typography variant="h6">Search Flashcards</Typography>
-              <Typography variant="body2" sx={{ mb: 2 }}>
-                Use our AI tool to generate your own prompts, questions, and more for you to be entertained by...
-              </Typography>
-              <TextField
-                fullWidth
-                placeholder="Search Here"
-                variant="outlined"
-                InputProps={{
-                  endAdornment: (
-                    <InputAdornment position="end">
-                      <IconButton>
-                        <SearchIcon />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                }}
-              />
-            </Paper>
-          </Grid>
-
-          {/* Daily Time Spent */}
-          <Grid item xs={12} sm={6}>
-            <Paper sx={{ p: 3, borderRadius: 2, boxShadow: 3 }}>
-              <Typography variant="h6">6 hrs, 16 Mins</Typography>
-              <Typography variant="body2">Today</Typography>
-              <Box sx={{ mt: 2 }}>
-                {/* Bar Chart Placeholder */}
-                <Box sx={{ height: 100, backgroundColor: '#f4f4f4', borderRadius: 2 }}></Box>
-              </Box>
-            </Paper>
-          </Grid>
-        </Grid>
-
-        {/* Flashcard Categories */}
-        <Box sx={{ mt: 5 }}>
-          <Typography variant="h5" align="center" gutterBottom>
-            Flashcard Categories
-          </Typography>
-          <Grid container spacing={2} justifyContent="center">
-            {['Science', 'Computer', 'Mathematics', 'Literature', 'Language', 'Business'].map((category) => (
-              <Grid item key={category}>
-                <Paper
-                  sx={{
-                    p: 2,
-                    borderRadius: 2,
-                    boxShadow: 3,
-                    textAlign: 'center',
-                    minWidth: 100,
-                  }}
-                >
-                  <Typography variant="body1" align="center">
-                    {category}
-                  </Typography>
-                </Paper>
-              </Grid>
-            ))}
-          </Grid>
+          <Typography variant="h4">Aaron Don</Typography>
         </Box>
 
         {/* Flashcards Display */}
         {flashcards.length > 0 && (
           <Box sx={{ mt: 5 }}>
-            <Typography variant="h5" align="center" gutterBottom>
-              Generated Flashcards
-            </Typography>
             <Flashcard flashcardsData={flashcards} />
           </Box>
         )}
@@ -208,6 +124,12 @@ export default function Homepage() {
         <IconButton onClick={handleOpenModal}>
           <AddCircleIcon fontSize="large" sx={{ color: '#11144c' }} />
         </IconButton>
+        <Button onClick={handleAddFlashcard} variant="contained" sx={{ mx: 1 }}>
+          Add New Flashcard
+        </Button>
+        <Button onClick={handleRemoveFlashcard} variant="outlined" sx={{ mx: 1 }}>
+          Remove Flashcard
+        </Button>
         <IconButton>
           <PersonIcon />
         </IconButton>
