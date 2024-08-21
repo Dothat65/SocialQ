@@ -7,11 +7,8 @@ import PersonIcon from '@mui/icons-material/Person';
 import FlashOnIcon from '@mui/icons-material/FlashOn';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import FlashcardModal from '../homepage/modal';
-import Flashcard from '../dashboard/Flashcard';
 import { getAuth } from "firebase/auth";
-
 import Flashcard from '../components/Flashcard';
-
 const cleanFlashcardText = (text) => {
   return text.replace(/(\*\*Front:\*\*|\*\*Back:\*\*)/gi, '').trim();
 };
@@ -25,9 +22,6 @@ export default function Homepage() {
   const handleOpenModal = () => setOpenModal(true);
   const handleCloseModal = () => setOpenModal(false);
 
-  const auth = getAuth(); 
-
-  const currentUser  = auth.currentUser;
 
   const generateFlashcards = async (prompt) => {
     try {
