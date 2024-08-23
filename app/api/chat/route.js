@@ -17,63 +17,58 @@ export async function POST(req) {
       return NextResponse.json({ message: 'Valid count is required' }, { status: 400 });
     }
 
-    const flashcards = [];
+    const instructions = `
+    You are a flashcard creator. Your task is to generate concise and effective flashcards that facilitate learning and retention of information. Each flashcard should:
 
-    for (let i = 0; i < count; i++) {
-      const modifiedPrompt = `${prompt} Variation ${i + 1}`;
-      console.log(`Generating flashcard ${i + 1} with prompt: ${modifiedPrompt}`);
+    1. Be Clear and Concise: The question or prompt on the front of the flashcard should be straightforward, while the answer or explanation on the back should be clear and to the point.
+    2. Focus on Key Concepts: Identify and emphasize the most important information, concepts, definitions, or questions relevant to the subject.
+    3. Be Engaging: Whenever possible, use examples, analogies, or mnemonic devices to make the content more memorable.
+    4. Incorporate Active Recall: Design questions that challenge the learner to actively recall information rather than just recognize it.
+    5. Promote Understanding: If the topic requires, include brief explanations or context that aid in deeper understanding, rather than just rote memorization.
+    6. Be Organized: Group related flashcards together to help the learner build connections between concepts and ensure a logical flow of information.
+    7. Adapt to User Needs: Tailor the difficulty level and content of the flashcards to the specific knowledge level and learning goals of the user.
+    8. Keep It Visual: Where applicable, incorporate visual aids like diagrams, charts, or images to enhance understanding and retention.
+    9. Generate exactly ${count} flashcards.
+    Return in the following JSON format:
+    {
+        "flashcards": [{
+            "front": str,
+            "back": str
+        }]
+    };
+    `;
 
-      try {
-        const completion = await openai.chat.completions.create({
-          model: 'gpt-4-turbo',
-          messages: [
-            {
-              role: "system",
-              content: `
-                You are a creative assistant specializing in generating flashcards for educational and entertainment purposes. 
-                Your task is to generate unique and original content each time, ensuring that no two flashcards are alike. 
-                When generating a flashcard, ensure it is appropriate, engaging, and varied. 
-                Avoid repetition, and introduce new ideas or twists to common themes whenever possible.
-              `,
-            },
-            {
-              role: "user",
-              content: `Create a flashcard with the following context: ${modifiedPrompt}. Separate the front and back with the delimiter '---'.`,
-            },
-          ],
-        });
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4-turbo',
+      messages: [
+        {
+          role: "system",
+          content: instructions,
+        },
+        {
+          role: "user",
+          content: prompt,
+        },
+      ],
+    });
 
-        const generatedText = completion.choices[0]?.message?.content;
-        console.log(`Response for flashcard ${i + 1}:`, generatedText);
+    const generatedResponse = completion.choices[0]?.message?.content;
+    console.log('Generated response:', generatedResponse);
 
-        if (generatedText) {
-          let [front, back] = generatedText.split('---').map(part => part.trim());
-
-          if (!front || !back) {
-            front = generatedText.match(/(?:\*\*Front:\*\*|Front:)\s*(.*)/i)?.[1] || '';
-            back = generatedText.match(/(?:\*\*Back:\*\*|Back:)\s*(.*)/i)?.[1] || '';
-          }
-
-          if (front && back) {
-            flashcards.push({ front, back });
-          } else {
-            console.warn(`Invalid flashcard format in response for flashcard ${i + 1}`);
-          }
-        } else {
-          console.error(`No response or malformed response for flashcard ${i + 1}`);
-        }
-      } catch (apiError) {
-        console.error(`API Error while generating flashcard ${i + 1}:`, apiError);
-      }
+    let jsonResponse;
+    try {
+      jsonResponse = JSON.parse(generatedResponse);
+    } catch (error) {
+      console.error('Error parsing JSON:', error);
+      return NextResponse.json({ message: 'Invalid response format from API' }, { status: 500 });
     }
 
-    console.log('Generated Flashcards:', flashcards);
-
-    if (flashcards.length === 0) {
-      return NextResponse.json({ message: 'Unable to generate flashcards' }, { status: 500 });
+    if (jsonResponse?.flashcards?.length) {
+      return NextResponse.json({ flashcards: jsonResponse.flashcards }, { status: 200 });
+    } else {
+      return NextResponse.json({ message: 'No valid flashcards returned' }, { status: 500 });
     }
 
-    return NextResponse.json({ flashcards }, { status: 200 });
   } catch (error) {
     console.error("Error generating flashcards:", error);
     return NextResponse.json({ message: 'An error occurred while generating flashcards', error: error.message }, { status: 500 });

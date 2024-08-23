@@ -1,22 +1,29 @@
-// app\homepage\modal.js
 import React, { useState } from 'react';
 import { Box, Button, Modal, TextField, Typography, CircularProgress } from '@mui/material';
-
-
-const FlashcardModal = ({ open, handleClose, generateFlashcards }) => {
+import { handleCreateFlashcardSet, addflashCards } from '../../lib/firestoreFunctions';
+const FlashcardModal = ({ open, handleClose, generateFlashcards, setFlashcardSetName, user }) => {
   const [prompt, setPrompt] = useState('');
   const [loading, setLoading] = useState(false);
+  const [flashcardSetNameInput, setFlashcardSetNameInput] = useState('');
 
   const handleGenerate = async () => {
-    if (prompt) {
+    if (prompt && flashcardSetNameInput) {
       setLoading(true);
       try {
-        await generateFlashcards(prompt);
+        // Create the flashcard set and get its ID
+        const flashcardSetId = await handleCreateFlashcardSet(user.uid, flashcardSetNameInput);
+
+        // Generate flashcards with the prompt and flashcard set ID
+        await generateFlashcards(prompt, flashcardSetId);
+
+        setFlashcardSetName(flashcardSetNameInput);
+        console.log('flashcardSetNameInput:', flashcardSetNameInput);
       } catch (error) {
         console.error('Error generating flashcards:', error);
       } finally {
-        setLoading(false); 
+        setLoading(false);
         setPrompt('');
+        setFlashcardSetNameInput('');
         handleClose();
       }
     }
@@ -44,6 +51,14 @@ const FlashcardModal = ({ open, handleClose, generateFlashcards }) => {
         <TextField
           fullWidth
           variant="outlined"
+          placeholder="Enter flashcard set name..."
+          value={flashcardSetNameInput}
+          onChange={(e) => setFlashcardSetNameInput(e.target.value)}
+          sx={{ mb: 3 }}
+        />
+        <TextField
+          fullWidth
+          variant="outlined"
           placeholder="Enter your prompt here..."
           value={prompt}
           onChange={(e) => setPrompt(e.target.value)}
@@ -54,7 +69,7 @@ const FlashcardModal = ({ open, handleClose, generateFlashcards }) => {
         <Button
           variant="contained"
           onClick={handleGenerate}
-          disabled={!prompt || loading}  
+          disabled={!prompt || !flashcardSetNameInput || loading}
           startIcon={loading && <CircularProgress size={20} />}
         >
           {loading ? 'Loading...' : 'Generate Flashcards'}
@@ -64,4 +79,4 @@ const FlashcardModal = ({ open, handleClose, generateFlashcards }) => {
   );
 };
 
-export default FlashcardModal;  
+export default FlashcardModal;

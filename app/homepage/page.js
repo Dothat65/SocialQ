@@ -1,16 +1,42 @@
 "use client"
-import React, { useState } from 'react';
-import { Box, Container, Typography, IconButton, Grid, Paper, Button } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Container, Typography, IconButton, Button, TextField } from '@mui/material';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import HomeIcon from '@mui/icons-material/Home';
 import PersonIcon from '@mui/icons-material/Person';
-import FlashOnIcon from '@mui/icons-material/FlashOn';
-import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import FlashcardModal from '../homepage/modal';
-import { getAuth } from "firebase/auth";
 import Flashcard from '../components/Flashcard';
+import { getAuth, onAuthStateChanged, signOut } from 'firebase/auth';
+import { auth, db } from '../../firebase'; // Import auth and db from your firebase.js
+import { handleCreateFlashcardSet, addflashCards } from '../../lib/firestoreFunctions';
+import { doc, collection, getDoc, writeBatch } from 'firebase/firestore';
+
 const cleanFlashcardText = (text) => {
   return text.replace(/(\*\*Front:\*\*|\*\*Back:\*\*)/gi, '').trim();
+};
+
+const generateFlashcards = async (prompt, flashcardSetId) => {
+  try {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ prompt, count: 10 }), 
+    });
+
+    const data = await response.json();
+
+    if (!data.flashcards || !Array.isArray(data.flashcards)) {
+      throw new Error('Invalid flashcards data received');
+    }
+
+    for (const flashcard of data.flashcards) {
+      await addflashCards(flashcardSetId, flashcard);
+    }
+  } catch (error) {
+    console.error('Error generating flashcards:', error);
+  }
 };
 
 export default function Homepage() {
@@ -18,39 +44,48 @@ export default function Homepage() {
   const [openModal, setOpenModal] = useState(false);
   const [flashcards, setFlashcards] = useState([]);
   const [newFlashcard, setNewFlashcard] = useState({ front: '', back: '' });
+  const [setName, setSetName] = useState('');
 
-  const handleOpenModal = () => setOpenModal(true);
-  const handleCloseModal = () => setOpenModal(false);
-
-
-  const generateFlashcards = async (prompt) => {
-    try {
-      const response = await fetch('/api/chat', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ prompt, count: 5 }), 
-      });
-
-      const data = await response.json();
-
-      if (!data.flashcards || !Array.isArray(data.flashcards)) {
-        throw new Error('Invalid flashcards data received');
+  useEffect(() => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      console.log('Auth state changed:', user); // Log user
+      if (user) {
+        setUser(user);
+      } else {
+        setUser(null);
       }
+    });
+    return () => unsubscribe();
+  }, []);
 
-      const uniqueFlashcards = data.flashcards.filter((flashcard, index, self) =>
-        index === self.findIndex(f => f.front === flashcard.front && f.back === flashcard.back)
-      ).map(flashcard => ({
-        front: cleanFlashcardText(flashcard.front),
-        back: cleanFlashcardText(flashcard.back)
-      }));
+  const handleLogout = async () => {
+    try {
+      await signOut(auth);
+      console.log('User logged out');
+    } catch (error) {
+      console.error('Error logging out:', error);
+    }
+  };
 
-      setFlashcards(uniqueFlashcards);
+  const handleGenerateFlashcards = async (prompt, flashcardSetName) => {
+    if (!user) {
+      console.error('No user is logged in');
+      return;
+    }
+
+    try {
+      // Create a flashcard set and get its ID
+      const flashcardSetId = await handleCreateFlashcardSet(user.uid, flashcardSetName);
+      
+      // Generate flashcards with the prompt
+      await generateFlashcards(prompt, flashcardSetId);
     } catch (error) {
       console.error('Error generating flashcards:', error);
     }
   };
+
+  const handleOpenModal = () => setOpenModal(true);
+  const handleCloseModal = () => setOpenModal(false);
 
   const handleAddFlashcard = () => {
     setFlashcards([...flashcards, newFlashcard]);
@@ -62,6 +97,26 @@ export default function Homepage() {
       setFlashcards(flashcards.slice(0, -1));
     }
   };
+
+  const saveFlashcards = async () => {
+    if (!setName.trim()) {
+        alert('Please enter a name for your flashcard set.');
+        return;
+    }
+
+    try {
+        const flashcardSetId = await handleCreateFlashcardSet(user.uid, setName);
+        for (const flashcard of flashcards) {
+            await addflashCards(flashcardSetId, flashcard);
+        }
+        alert('Flashcards saved successfully!');
+        handleCloseModal();
+        setSetName('');
+    } catch (error) {
+        console.error('Error saving flashcards:', error);
+        alert('An error occurred while saving flashcards. Please try again.');
+    }
+};
 
   return (
     <Box sx={{ bgcolor: 'white', minHeight: '100vh', padding: 2 }}>
@@ -79,7 +134,12 @@ export default function Homepage() {
             mb: 4,
           }}
         >
-          <Typography variant="h4">Aaron Don</Typography>
+          <Typography variant="h4">Welcome, {user ? user.displayName || 'to SocialQ!': ''}</Typography>
+          {user && (
+            <Button onClick={handleLogout} variant="outlined">
+              Logout
+            </Button>
+          )}
         </Box>
 
         {/* Flashcards Display */}
@@ -94,8 +154,11 @@ export default function Homepage() {
       <FlashcardModal
         open={openModal}
         handleClose={handleCloseModal}
-        generateFlashcards={generateFlashcards}
+        generateFlashcards={handleGenerateFlashcards} // Pass the correct function
+        setFlashcardSetName={setSetName} // Pass the setFlashcardSetName function
+        user={user}
       />
+
 
       {/* Navigation Bar */}
       <Box
@@ -123,6 +186,16 @@ export default function Homepage() {
         </Button>
         <Button onClick={handleRemoveFlashcard} variant="outlined" sx={{ mx: 1 }}>
           Remove Flashcard
+        </Button>
+        <TextField
+          label="Set Name"
+          value={setName}
+          onChange={(e) => setSetName(e.target.value)}
+          fullWidth
+          margin="normal"
+        />
+        <Button onClick={saveFlashcards} variant="contained" sx={{ mx: 1 }}>
+          Save Flashcards
         </Button>
         <IconButton>
           <PersonIcon />
