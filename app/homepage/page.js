@@ -30,7 +30,7 @@ export default function Homepage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ prompt, count: 5 }), 
+        body: JSON.stringify({ prompt, count: 10 }), 
       });
 
       const data = await response.json();
