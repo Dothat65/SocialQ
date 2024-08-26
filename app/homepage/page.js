@@ -79,7 +79,7 @@ export default function Homepage() {
             mb: 4,
           }}
         >
-          <Typography variant="h4">Aaron Don</Typography>
+          <Typography variant="h4">Welcome to SocialQ!</Typography>
         </Box>
 
         {/* Flashcards Display */}
