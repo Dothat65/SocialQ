@@ -1,4 +1,3 @@
-// app\homepage\modal.js
 import React, { useState } from 'react';
 import { Box, Button, Modal, TextField, Typography, CircularProgress } from '@mui/material';
 
