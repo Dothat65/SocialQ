@@ -13,7 +13,7 @@ const cleanFlashcardText = (text) => {
   return text.replace(/(\*\*Front:\*\*|\*\*Back:\*\*)/gi, '').trim();
 };
 
-export default function Dashboard() {
+export default function Homepage() {
   const [user, setUser] = useState(null);
   const [openModal, setOpenModal] = useState(false);
   const [flashcards, setFlashcards] = useState([]);
@@ -30,7 +30,7 @@ export default function Dashboard() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ prompt, count: 5 }), 
+        body: JSON.stringify({ prompt, count: 10 }), 
       });
 
       const data = await response.json();
@@ -79,7 +79,7 @@ export default function Dashboard() {
             mb: 4,
           }}
         >
-          <Typography variant="h4">Aaron Don</Typography>
+          <Typography variant="h4">Welcome to SocialQ!</Typography>
         </Box>
 
         {/* Flashcards Display */}
