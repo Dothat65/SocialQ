@@ -1,36 +1,26 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
-## Getting Started
 
-First, run the development server:
+## SocialQ
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+SocialQ is an AI-powered tool designed to enhance social interactions by providing users with flashcards containing jokes, conversation starters, and questions. These flashcards are generated to facilitate conversations and help users practice social skills through active recall. SocialQ aims to help users feel more confident in social situations, whether they're preparing for a casual chat, an interview, or a public speaking event.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+## Features
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+- **AI-Generated Flashcards**: Receive personalized flashcards with conversation starters, jokes, and questions to boost social interaction.
+- **Customizable Flashcards**: Add your own flashcards for a more tailored experience.
+- **User Accounts**: Log in to view personalized content and track your progress.
+- **Active Recall Practice**: Use flashcards to practice and improve your social interaction skills.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+## Project Goals
 
-## Learn More
+SocialQ aims to help users:
+1. Improve their social skills.
+2. Feel more comfortable initiating conversations.
+3. Practice social engagement in a fun, interactive way.
 
-To learn more about Next.js, take a look at the following resources:
+## Tech Stack
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+- **Frontend**: nextJS (or your chosen frontend framework)
+- **Backend**: Node.js, Firebase
+- **Database**: Firestore
+- **AI**: OpenAI API
